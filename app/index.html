@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>bin thingy</title>
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <!-- Place favicon.ico in the root directory -->
+
+    <!-- build:css styles/vendor.css -->
+    <!-- bower:css -->
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <!-- build:css styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+
+  </head>
+  <body>
+    <!--[if IE]>
+      <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    <div class="wrapper">
+      <div class="hero-unit" id="hero_unit">
+        <h1>Hello hooman...</h1>
+        <p>presenting the most fantastic `tossing game` 🙄</p>
+      </div>
+
+      <div class="scene-wrapper" id="scene_wrapper"></div>
+    </div>
+
+    <div class="basket-location-button-wrapper" id="basket_location_button">
+      <div class="button button--basket-location">
+        <i class="material-icons" data-active="lock_open" data-inactive="lock_outline">lock_open</i>
+      </div>
+      <div class="button--label" data-active="place the basket" data-inactive="basket placed">place the basket</div>
+    </div>
+
+    <div class="helper-button-wrapper" id="helper_button">
+      <div class="button button--helper">
+        <i class="material-icons" data-active="location_disabled" data-inactive="location_searching">location_disabled</i>
+      </div>
+      <div class="button--label" data-active="Helper enabled" data-inactive="Helper disabled">Helper disabled</div>
+    </div>
+
+    <div class="message-wrapper" id="message_wrapper">
+      <ol>
+        <li>Begin by placing your basket into the world by tapping</li>
+        <li>Once basket is placed, click on the green button at bottom right to lock the position</li>
+        <li>Begin throwing the ball by tapping on the screen, you can adjust the velocity by tapping bottom -> top.</li>
+        <li>Tap on point helper button at the bottom left, to view the velocity point (still buggy)</li>
+      </ol>
+      <p>
+        <strong>NOTE: If you are having trouble to place the basket, wait until you see the <i>orange</i> circle pointer appears and then try to place the basket by tapping. :)</strong>
+      </p>
+      <p><strong>Whenever you are ready, tap to begin.</strong></p>
+    </div>
+
+    <!-- build:js scripts/vendor.js -->
+    <!-- bower:js -->
+    <script src="/bower_components/threejs/build/three.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <!-- build:js scripts/main.js -->
+    <script src="/bower_components/cannon.js/build/cannon.js"></script>
+    <script src="/bower_components/cannon.js/tools/threejs/CannonDebugRenderer.js"></script>
+    <script src="/bower_components/threejs/examples/js/controls/VRControls.js"></script>
+    <script src="/bower_components/threejs/examples/js/objects/ShadowMesh.js"></script>
+    <script src="scripts/app.js"></script>
+    <!-- endbuild -->
+  </body>
+</html>

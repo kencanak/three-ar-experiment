@@ -1,0 +1,13 @@
+{
+  "name": "bin-thingy",
+  "private": true,
+  "dependencies": {
+    "threejs": "*",
+    "material-design-icons": "*",
+    "cannon.js": "*"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^3.5.3"
+  }
+}
