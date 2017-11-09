@@ -30,4 +30,4 @@
 2. improve user experience
 3. proper game play
 4. add in fancy environment
-5. add in gulp task for deploying to `gcloud` or heroku
+5. add in gulp task for deploying to `gcloud` or `heroku`
