@@ -24,14 +24,25 @@ class ARReticle {
   init() {
     // Create our ARReticle, which will continuously fire `hitTest` to trace
     // the detected surfaces
-    this._reticle = new THREE.ARReticle(this._vrDisplay,
-      this._reticleProps.innerRadius,
-      this._reticleProps.outerRadius,
-      this._reticleProps.color,
-      this._reticleProps.easing
-    );
+    const geom = new THREE.RingGeometry(this._reticleProps.innerRadius, this._reticleProps.outerRadius, 36, 64);
+    const material = new THREE.MeshBasicMaterial({
+      color: this._reticleProps.color
+    });
+
+    // Orient the geometry so it's position is flat on a horizontal surface
+    geom.applyMatrix(new THREE.Matrix4().makeRotationX(THREE.Math.degToRad(-90)));
+
+    this._reticle = new THREE.Mesh(geom, material);
 
     this._scene.add(this._reticle);
+  }
+
+  hide() {
+    this._reticle.visible = false;
+  }
+
+  show() {
+    this._reticle.visible = true;
   }
 
   remove() {
@@ -44,7 +55,14 @@ class ARReticle {
       // Update our ARReticle's position, and provide normalized
       // screen coordinates to send the hit test -- in this case, (0.5, 0.5)
       // is the middle of our screen
-      this._reticle.update(0.5, 0.5);
+      if (!this._vrDisplay || !this._vrDisplay.hitTest) {
+        return;
+      }
+
+      const hit = this._vrDisplay.hitTest(0.5, 0.5);
+      if (hit && hit.length > 0) {
+        THREE.ARUtils.placeObjectAtHit(this._reticle, hit[0], true, this._reticleProps.easing);
+      }
     }
   }
 }
