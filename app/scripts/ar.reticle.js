@@ -51,7 +51,7 @@ class ARReticle {
   }
 
   render() {
-    if (this._reticle) {
+    if (this._reticle && this._reticle.visible) {
       // Update our ARReticle's position, and provide normalized
       // screen coordinates to send the hit test -- in this case, (0.5, 0.5)
       // is the middle of our screen
