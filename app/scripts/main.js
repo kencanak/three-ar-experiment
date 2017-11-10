@@ -464,15 +464,15 @@ class PaperToss {
       this.basket.position.copy(this.basketWall.frame.position);
     }
 
-    if (this.pointerHelper && this.pointerNeeded) {
-      const shootDirection = this._camera.getWorldDirection();
+    // if (this.pointerHelper && this.pointerNeeded) {
+    //   const shootDirection = this._camera.getWorldDirection();
 
-      this.pointerHelper.position.set(
-        shootDirection.x * this.shootingVelocity,
-        shootDirection.y * this.shootingVelocity,
-        shootDirection.z * this.shootingVelocity
-      );
-    }
+    //   this.pointerHelper.position.set(
+    //     shootDirection.x * this.shootingVelocity,
+    //     shootDirection.y * this.shootingVelocity,
+    //     shootDirection.z * this.shootingVelocity
+    //   );
+    // }
 
     // Update ball positions
     for(let i=0; i < this.balls.length; i++){
