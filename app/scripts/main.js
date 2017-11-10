@@ -29,8 +29,8 @@ class PaperToss {
 
     // 3d objects
     this.basket = null;
-    this.basketRadius = .2;
-    this.basketHeight = .35;
+    this.basketRadius = 0.2;
+    this.basketHeight = 0.35;
     this.basketWall = {};
 
     this.balls = [];
@@ -175,11 +175,11 @@ class PaperToss {
   }
 
   throwBall() {
-    const ballShape = new CANNON.Sphere(.04);
+    const ballShape = new CANNON.Sphere(0.04);
 
     // let's place the paper ball at touch point
     let ballBody = new CANNON.Body({
-      mass: .1,
+      mass: 0.1,
       material: new CANNON.Material()
     });
 
@@ -203,8 +203,8 @@ class PaperToss {
                             shootDirection.y * this.shootingVelocity,
                             shootDirection.z * this.shootingVelocity);
 
-    ballBody.position.set(this._camera.position.x, this._camera.position.y + .2, this._camera.position.z);
-    ballMesh.position.set(this._camera.position.x, this._camera.position.y + .2, this._camera.position.z);
+    ballBody.position.set(this._camera.position.x, this._camera.position.y + 0.1, this._camera.position.z);
+    ballMesh.position.set(this._camera.position.x, this._camera.position.y + 0.1, this._camera.position.z);
 
     ballBody.quaternion.copy(this._camera.quaternion);
     ballMesh.quaternion.copy(this._camera.quaternion);
@@ -313,7 +313,8 @@ class PaperToss {
     this.basketWall.frame.linearDamping = 0;
     this._world.add(this.basketWall.frame);
 
-    var halfExtents = new CANNON.Vec3(this.basketRadius / 2, this.basketHeight, .02);
+    // 1.8, is to make the wall slightly bigger
+    var halfExtents = new CANNON.Vec3(this.basketRadius / 1.8, this.basketHeight, 0.02);
 
     const boxShape = new CANNON.Box(halfExtents);
 
@@ -370,43 +371,43 @@ class PaperToss {
 
     // First bottom point
     verts.push(new CANNON.Vec3(
-      radiusBottom*cos(0),
-      radiusBottom*sin(0),
-      -height*0.5)
+      radiusBottom * cos(0),
+      radiusBottom * sin(0),
+      -height * 0.5)
     );
 
     bottomface.push(0);
 
     // First top point
     verts.push(new CANNON.Vec3(
-      radiusTop*cos(0),
-      radiusTop*sin(0),
-      height*0.5)
+      radiusTop * cos(0),
+      radiusTop * sin(0),
+      height * 0.5)
     );
 
     topface.push(1);
 
     for(let i=0; i<N; i++){
-      const theta = 2*Math.PI/N * (i+1);
-      const thetaN = 2*Math.PI/N * (i+0.5);
+      const theta = 2 * Math.PI/N * (i+1);
+      const thetaN = 2 * Math.PI/N * (i+0.5);
 
-      if(i<N-1){
+      if(i < N-1){
         // Bottom
-        verts.push(new CANNON.Vec3(radiusBottom*cos(theta),
-                                  radiusBottom*sin(theta),
-                                  -height*0.5));
+        verts.push(new CANNON.Vec3(radiusBottom * cos(theta),
+                                  radiusBottom * sin(theta),
+                                  -height * 0.5));
 
-        bottomface.push(2*i+2);
+        bottomface.push(2 * i + 2);
         // Top
-        verts.push(new CANNON.Vec3(radiusTop*cos(theta),
-                                  radiusTop*sin(theta),
-                                  height*0.5));
-        topface.push(2*i+3);
+        verts.push(new CANNON.Vec3(radiusTop * cos(theta),
+                                  radiusTop * sin(theta),
+                                  height * 0.5));
+        topface.push(2 * i + 3);
 
         // Face
-        faces.push([2*i+2, 2*i+3, 2*i+1,2*i]);
+        faces.push([2 * i + 2, 2 * i + 3, 2 * i + 1, 2 * i]);
       } else {
-        faces.push([0,1, 2*i+1, 2*i]); // Connect
+        faces.push([0, 1, 2 * i + 1, 2 * i]); // Connect
       }
 
       // Axis: we can cut off half of them if we have even number of segments
@@ -415,7 +416,7 @@ class PaperToss {
       }
     }
 
-    axes.push(new CANNON.Vec3(0,0,1));
+    axes.push(new CANNON.Vec3(0, 0, 1));
 
     if (!openEndedTop) {
       faces.push(topface);
@@ -487,10 +488,12 @@ class PaperToss {
   setBinPositionButtonState() {
     this.basketPositionLocked = !this.basketPositionLocked;
 
-    if (this.basketPositionLocked) {
-      this.reticle.remove();
-    } else {
-      this.reticle.init();
+    if (this.reticle) {
+      if (this.basketPositionLocked) {
+        this.reticle.hide();
+      } else {
+        this.reticle.show();
+      }
     }
 
     this.changeButtonState(this.basketPositionLocked, this.basketLocationButton);
