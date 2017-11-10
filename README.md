@@ -26,7 +26,7 @@
 
 
 ## TODO
-1. add in better velocity helper
+1. add in trajectory line
 2. improve user experience
 3. proper game play
 4. add in fancy environment
