@@ -146,7 +146,7 @@ class PaperToss {
           }
         });
 
-        this.showMessage(false, 'bin has been placed, you can now lock this position and start throwing shit. (⌐■_■)');
+        this.showMessage(false, 'bin has been placed, you can now lock this position and begin throwing. (⌐■_■)');
         return;
       }
 
