@@ -34,6 +34,9 @@ class ARReticle {
 
     this._reticle = new THREE.Mesh(geom, material);
 
+    // set some where far away
+    this._reticle.position.set(10000, 10000, 10000);
+
     this._scene.add(this._reticle);
   }
 
