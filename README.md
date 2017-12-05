@@ -24,8 +24,23 @@
 
 ## Project build
 1. Go to project root
+2. run `npm install` and `bower install`
 2. run `gulp build`
-3. All distribution files will be generated into `dist` folder
+3. All distribution files will be generated into `dist/public` folder
+
+
+## Deploying to heroku
+1. create `free` heroku account
+2. install `Heroku Toolbelt` - https://github.com/heroku/legacy-cli
+3. create new heroku app by `heroku create [app name]`
+4. you will see the following message once the app created
+  `Creating ⬢ three-ar-experiment... done`
+  `[app-url] | [heroku app repo]`
+5. you should see `heroku` as one of the remote repo when you run `git remote`
+6. build the project accordingly, please refer to the above instructions
+7. once you are done with it, commit and push the `dist folder` to heroku master branch
+  `git subtree push --prefix dist/ heroku master`
+8. once done, you can now preview the app from `[heroku app url]`
 
 
 ## TODO
