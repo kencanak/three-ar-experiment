@@ -22,7 +22,7 @@ app.all('*', ensureDomain);
 app.use(compression());
 
 // default to .html (you can omit the extension in the URL)
-app.use(serveStatic('dist/public', {'extensions': ['html']}));
+app.use(serveStatic(`${__dirname}/public`, {'extensions': ['html']}));
 
 app.listen(port, () => {
   console.log('Server running...');
