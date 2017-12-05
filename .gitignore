@@ -1,5 +1,4 @@
 node_modules
-dist/public
 .tmp
 bower_components
 test/bower_components
