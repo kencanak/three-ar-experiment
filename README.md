@@ -48,5 +48,5 @@
 2. [ ] add in swipe to throw thingy
 2. [ ] improve user experience
 3. [ ] proper game play
-4. [ ] add in fancy environment
+4. [ ] add in fancy environment, we need some *pennywise* here, you'll float too!
 5. [x] add in gulp task for deploying to `gcloud` or `heroku`
