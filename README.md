@@ -24,13 +24,29 @@
 
 ## Project build
 1. Go to project root
+2. run `npm install` and `bower install`
 2. run `gulp build`
-3. All distribution files will be generated into `dist` folder
+3. All distribution files will be generated into `dist/public` folder
+
+
+## Deploying to heroku
+1. create `free` heroku account
+2. install `Heroku Toolbelt` - https://github.com/heroku/legacy-cli
+3. create new heroku app by `heroku create [app name]`
+4. you will see the following message once the app created
+  `Creating ⬢ three-ar-experiment... done`
+  `[app-url] | [heroku app repo]`
+5. you should see `heroku` as one of the remote repo when you run `git remote`
+6. build the project accordingly, please refer to the above instructions
+7. once you are done with it, commit and push the `dist folder` to heroku master branch
+  `git subtree push --prefix dist/ heroku master`
+8. once done, you can now preview the app from `[heroku app url]`
 
 
 ## TODO
-1. add in trajectory line
-2. improve user experience
-3. proper game play
-4. add in fancy environment
-5. add in gulp task for deploying to `gcloud` or `heroku`
+1. [ ] ~~add in trajectory line~~
+2. [ ] add in swipe to throw thingy
+2. [ ] improve user experience
+3. [ ] proper game play
+4. [ ] add in fancy environment, we need some *pennywise* here, you'll float too!
+5. [x] add in gulp task for deploying to `gcloud` or `heroku`

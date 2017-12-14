@@ -12,7 +12,6 @@ body {
 }
 
 body {
-  background: #000;
   font-family: 'Raleway', sans-serif;
   color: #fff;
 }
@@ -39,6 +38,9 @@ body {
   box-sizing: border-box;
 
   padding: 4px 16px 8px;
+
+  // this is for ios fix *rolling eyes
+  background-color: #000;
 }
 
 .scene-wrapper {
