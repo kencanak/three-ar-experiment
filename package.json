@@ -52,7 +52,7 @@
     "vinyl-buffer": "^1.0.0",
     "babelify": "^7.3.0",
     "three": "^0.88.0",
-    "three.ar.js": "^0.1.5",
+    "three.ar.js": "^0.1.6",
     "events": "^1.1.1"
   },
   "eslintConfig": {
