@@ -228,14 +228,16 @@ class PaperToss {
     this._world.addBody(ballBody);
 
     // compute swipe distance
-    const swipeDist = Math.abs(this.swipePosition.endY - this.swipePosition.startY);
+    const swipeDist = Math.sqrt(Math.pow((this.swipePosition.endX - this.swipePosition.startX), 2) + Math.pow((this.swipePosition.endY - this.swipePosition.startY), 2));
 
-    // we use 5% of the total y distance for x and z velocity value
-    // we use .3% of the total y distance for y velocity value
-    // TODO: refactor this. maybe there is a proper way to set the velocity instead of magic number
-    ballBody.velocity.set(  shootDirection.x * (swipeDist * .05),
-                            shootDirection.y + (swipeDist * .004),
-                            shootDirection.z * (swipeDist * .05));
+    const timeDelta = this.swipePosition.endTime - this.swipePosition.startTime;
+
+    // compute velocity by dist / time delta
+    const velocity = swipeDist / timeDelta;
+
+    ballBody.velocity.set(  shootDirection.x,
+                            shootDirection.y + velocity,
+                            shootDirection.z - velocity);
 
     ballBody.position.set(this._camera.position.x, this._camera.position.y - this.ballHolderDeltaPosition, this._camera.position.z);
     ballMesh.position.set(this._camera.position.x, this._camera.position.y - this.ballHolderDeltaPosition, this._camera.position.z);
