@@ -116,11 +116,16 @@ class ARBase {
     /////////////////////////////////////////
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
 
-    this._canvas.addEventListener('touchstart', this.onTouchEvent.bind(this), false);
+    this._canvas.addEventListener('touchstart', this.onTouchStartEvent.bind(this), false);
+    this._canvas.addEventListener('touchend', this.onTouchEndEvent.bind(this), false);
   }
 
-  onTouchEvent(e) {
-    this.events.emit('arbase-touched', e);
+  onTouchStartEvent(e) {
+    this.events.emit('arbase-touched-start', e);
+  }
+
+  onTouchEndEvent(e) {
+    this.events.emit('arbase-touched-end', e);
   }
 
   onWindowResize() {

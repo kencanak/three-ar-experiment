@@ -17,15 +17,26 @@ class PaperToss {
     this.arBase = null;
     this.physicsBase = null;
 
+    this.ballShape = new CANNON.Sphere(0.05);
+    this.ballHolder = null;
+    this.ballHolderDeltaPosition = .08;
+
     this.shootingVelocity = 6;
+
+    this.swipePosition = {
+      startX: 0,
+      startY: 0,
+      startTime: 0,
+      endX: 0,
+      endY: 0,
+      endTime: 0
+    };
 
     // ui state flag
     this.basketPositionLocked = false;
     this.basketPlaced = false;
+    this.okToPlay = false;
     this.gameBegin = false;
-
-    this.pointerHelper = null;
-    this.pointerNeeded = false;
 
     // 3d objects
     this.basket = null;
@@ -76,7 +87,7 @@ class PaperToss {
       this.render();
     });
 
-    this.arBase.events.on('arbase-touched', (e) => {
+    this.arBase.events.on('arbase-touched-start', (e) => {
       this.hideMessage();
 
       // to flag that game has begin after first tap
@@ -84,13 +95,24 @@ class PaperToss {
         this.gameBegin = true;
         return;
       }
+
+      this.swipePosition.startX = e.touches[0].pageX;
+      this.swipePosition.startY = e.touches[0].pageY;
+      this.swipePosition.startTime = e.timeStamp;
+
       this.paperTossTouchEvent(e);
+    });
+
+    this.arBase.events.on('arbase-touched-end', (e) => {
+      this.swipePosition.endX = e.changedTouches[0].pageX;
+      this.swipePosition.endY = e.changedTouches[0].pageY;
+      this.swipePosition.endTime = e.timeStamp;
+      this.throwBall();
     });
 
     this.messageWrapper.addEventListener('touchstart', this.hideMessage.bind(this), false);
 
     this.basketLocationButton.addEventListener('touchstart', this.setBinPositionButtonState.bind(this), false);
-    this.helperButton.addEventListener('touchstart', this.setHelperButtonState.bind(this), false);
   }
 
   paperTossTouchEvent(e) {
@@ -155,13 +177,6 @@ class PaperToss {
       this.showMessage(false, 'invalid bin location, please try again ಠ▃ಠ');
       return;
     }
-
-    if (!this.basketPlaced) {
-      this.showMessage(false, 'please place the damn bin into this world first ಠ▃ಠ');
-      return;
-    }
-
-    this.throwBall();
   }
 
   clearAllBalls() {
@@ -174,8 +189,30 @@ class PaperToss {
     this.balls = [];
   }
 
+  showHideBallHolder() {
+    if (!this.ballHolder) {
+      this.ballHolder = this.createBallObject(null, 0x004d40, this.ballShape.radius * .1 );
+      this.ballHolder.castShadow = true;
+      this.ballHolder.receiveShadow = true;
+      this.ballHolder.translateZ = -2;
+      this._scene.add(this.ballHolder);
+    }
+  }
+
   throwBall() {
-    const ballShape = new CANNON.Sphere(0.04);
+    if (!this.basketPositionLocked) {
+      return;
+    }
+
+    const shootDirection = this._camera.getWorldDirection();
+
+    let ballMesh = this.createBallObject(null, 0x004d40, this.ballShape.radius );
+    ballMesh.castShadow = true;
+    ballMesh.receiveShadow = true;
+
+    this.balls.push(ballMesh);
+
+    this._scene.add(ballMesh);
 
     // let's place the paper ball at touch point
     let ballBody = new CANNON.Body({
@@ -183,47 +220,28 @@ class PaperToss {
       material: new CANNON.Material()
     });
 
-    ballBody.addShape(ballShape);
+    ballBody.addShape(this.ballShape);
     ballBody.linearDamping = 0;
 
     this.ballsPhysics.push(ballBody);
 
     this._world.addBody(ballBody);
 
-    let ballMesh = this.createBallObject(null, 0x004d40, ballShape.radius );
-    ballMesh.castShadow = true;
-    ballMesh.receiveShadow = true;
-    this.balls.push(ballMesh);
+    // compute swipe distance
+    const swipeDist = Math.abs(this.swipePosition.endY - this.swipePosition.startY);
 
-    this._scene.add(ballMesh);
+    // we use 5% of the total y distance for x and z velocity value
+    // we use .3% of the total y distance for y velocity value
+    // TODO: refactor this. maybe there is a proper way to set the velocity instead of magic number
+    ballBody.velocity.set(  shootDirection.x * (swipeDist * .05),
+                            shootDirection.y + (swipeDist * .004),
+                            shootDirection.z * (swipeDist * .05));
 
-    const shootDirection = this._camera.getWorldDirection();
-
-    ballBody.velocity.set(  shootDirection.x * this.shootingVelocity,
-                            shootDirection.y * this.shootingVelocity,
-                            shootDirection.z * this.shootingVelocity);
-
-    ballBody.position.set(this._camera.position.x, this._camera.position.y + 0.1, this._camera.position.z);
-    ballMesh.position.set(this._camera.position.x, this._camera.position.y + 0.1, this._camera.position.z);
+    ballBody.position.set(this._camera.position.x, this._camera.position.y - this.ballHolderDeltaPosition, this._camera.position.z);
+    ballMesh.position.set(this._camera.position.x, this._camera.position.y - this.ballHolderDeltaPosition, this._camera.position.z);
 
     ballBody.quaternion.copy(this._camera.quaternion);
     ballMesh.quaternion.copy(this._camera.quaternion);
-  }
-
-  createPointerHelperObject() {
-    const geom = new THREE.RingGeometry(0.1, 0.2, 36, 64);
-    const material = new THREE.MeshBasicMaterial({
-      color: 0xFFFF00
-    });
-
-    // Orient the geometry so it's position is flat on a horizontal surface
-    geom.applyMatrix(new THREE.Matrix4().makeRotationX(THREE.Math.degToRad(-90)));
-
-    const helper = new THREE.Mesh(geom, material);
-
-    this.hideObject(helper);
-
-    return helper;
   }
 
   createBasketObject() {
@@ -455,29 +473,18 @@ class PaperToss {
       // add bin into the world
       this.basket = this.createBasketObject();
       this._scene.add(this.basket);
-
-      this.pointerHelper = this.createPointerHelperObject();
-      this._scene.add(this.pointerHelper);
     }
 
     if (this.basketWall.frame) {
       this.basket.position.copy(this.basketWall.frame.position);
     }
 
-    // if (this.pointerHelper && this.pointerNeeded) {
-    //   const shootDirection = this._camera.getWorldDirection();
-
-    //   this.pointerHelper.position.set(
-    //     shootDirection.x * this.shootingVelocity,
-    //     shootDirection.y * this.shootingVelocity,
-    //     shootDirection.z * this.shootingVelocity
-    //   );
-    // }
-
     // Update ball positions
     for(let i=0; i < this.balls.length; i++){
-      this.balls[i].position.copy(this.ballsPhysics[i].position);
-      this.balls[i].quaternion.copy(this.ballsPhysics[i].quaternion);
+      if (this.ballsPhysics[i]) {
+        this.balls[i].position.copy(this.ballsPhysics[i].position);
+        this.balls[i].quaternion.copy(this.ballsPhysics[i].quaternion);
+      }
     }
 
     requestAnimationFrame(() => {
@@ -486,27 +493,23 @@ class PaperToss {
   }
 
   setBinPositionButtonState() {
+    if (!this.basketPlaced) {
+      this.showMessage(false, 'where is your basket dude ಠ▃ಠ');
+      return;
+    }
+
     this.basketPositionLocked = !this.basketPositionLocked;
 
     if (this.reticle) {
       if (this.basketPositionLocked) {
         this.reticle.hide();
+        // this.showHideBallHolder();
       } else {
         this.reticle.show();
       }
     }
 
     this.changeButtonState(this.basketPositionLocked, this.basketLocationButton);
-  }
-
-  setHelperButtonState() {
-    this.pointerNeeded = !this.pointerNeeded;
-
-    if (!this.pointerNeeded) {
-      this.hideObject(this.pointerHelper);
-    }
-
-    this.changeButtonState(this.pointerNeeded, this.helperButton);
   }
 
   changeButtonState(isActive, elem) {

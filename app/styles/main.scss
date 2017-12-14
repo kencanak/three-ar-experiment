@@ -75,8 +75,7 @@ body {
   }
 }
 
-.basket-location-button-wrapper,
-.helper-button-wrapper {
+.basket-location-button-wrapper {
   display: flex;
   position: fixed;
 
@@ -101,13 +100,6 @@ body {
   .button--label {
     width: 64px;
   }
-}
-
-.helper-button-wrapper {
-  right: auto;
-  left: 16px;
-
-  display: none;
 }
 
 .message-wrapper {
