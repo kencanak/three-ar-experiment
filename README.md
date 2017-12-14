@@ -45,7 +45,7 @@
 
 ## TODO
 1. [ ] ~~add in trajectory line~~
-2. [ ] add in swipe to throw thingy
+2. [x] add in swipe to throw thingy
 2. [ ] improve user experience
 3. [ ] proper game play
 4. [ ] add in fancy environment, we need some *pennywise* here, you'll float too!
