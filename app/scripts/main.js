@@ -21,7 +21,7 @@ class PaperToss {
     this.ballHolder = null;
     this.ballHolderDeltaPosition = .08;
 
-    this.shootingVelocity = 6;
+    this.baseShootingVelocity = 3;
 
     this.swipePosition = {
       startX: 0,
@@ -233,17 +233,23 @@ class PaperToss {
     const timeDelta = this.swipePosition.endTime - this.swipePosition.startTime;
 
     // compute velocity by dist / time delta
-    const velocity = swipeDist / timeDelta;
+    const velocity = (swipeDist / timeDelta);
 
-    ballBody.velocity.set(  this._camera.position.x ,
-                            shootDirection.y + velocity,
-                            shootDirection.z - velocity);
+
+    // z and x velocity value are relative to each other.
+    // we need to find the ratio of the final z value with origin
+    // use the ratio value and multiply it with x value
+    // this theory could be wrong. but for now it fix the weird behavior
+    const zVel = shootDirection.z - velocity;
+    const zRatio = zVel / shootDirection.z;
+
+    ballBody.velocity.set(shootDirection.x * zRatio,
+      shootDirection.y + velocity,
+      shootDirection.z - velocity);
 
     ballBody.position.set(this._camera.position.x, this._camera.position.y - this.ballHolderDeltaPosition, this._camera.position.z);
-    ballMesh.position.set(this._camera.position.x, this._camera.position.y - this.ballHolderDeltaPosition, this._camera.position.z);
 
-    ballBody.quaternion.copy(this._camera.quaternion);
-    ballMesh.quaternion.copy(this._camera.quaternion);
+    ballMesh.position.set(this._camera.position.x, this._camera.position.y - this.ballHolderDeltaPosition, this._camera.position.z);
   }
 
   createBasketObject() {

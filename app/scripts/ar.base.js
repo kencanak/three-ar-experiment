@@ -117,6 +117,9 @@ class ARBase {
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
 
     this._canvas.addEventListener('touchstart', this.onTouchStartEvent.bind(this), false);
+
+    this._canvas.addEventListener('touchmove', this.onTouchMoveEvent.bind(this), false);
+
     this._canvas.addEventListener('touchend', this.onTouchEndEvent.bind(this), false);
   }
 
@@ -126,6 +129,10 @@ class ARBase {
 
   onTouchEndEvent(e) {
     this.events.emit('arbase-touched-end', e);
+  }
+
+  onTouchMoveEvent(e) {
+    e.preventDefault();
   }
 
   onWindowResize() {
