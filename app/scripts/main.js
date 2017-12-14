@@ -235,7 +235,7 @@ class PaperToss {
     // compute velocity by dist / time delta
     const velocity = swipeDist / timeDelta;
 
-    ballBody.velocity.set(  shootDirection.x,
+    ballBody.velocity.set(  this._camera.position.x ,
                             shootDirection.y + velocity,
                             shootDirection.z - velocity);
 
