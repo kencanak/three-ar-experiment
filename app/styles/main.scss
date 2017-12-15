@@ -16,6 +16,18 @@ body {
   color: #fff;
 }
 
+h1 {
+  margin-bottom: 0;
+}
+
+p {
+  margin-top: 0;
+}
+
+.note {
+  font-size: 10px;
+}
+
 #webgl-error-message {
   position: absolute;
 
