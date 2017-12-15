@@ -1,7 +1,10 @@
 # three-ar-experiment
 
 ## Preview
-[![Alt text](https://img.youtube.com/vi/Dfi2sfLb0VU/0.jpg)](https://www.youtube.com/watch?v=Dfi2sfLb0VU)
+[![Alt text](https://img.youtube.com/vi/WGZwcM6rJGI/0.jpg)](https://www.youtube.com/watch?v=WGZwcM6rJGI)
+
+## Demo link
+https://three-ar-experiment.herokuapp.com/
 
 ## Pre-requisites
 ### Development
