@@ -92,6 +92,11 @@ gulp.task('images', () => {
     .pipe(gulp.dest('dist/public/images'));
 });
 
+gulp.task('3D_objects', () => {
+  return gulp.src('app/3D_objects/**/*')
+    .pipe(gulp.dest('dist/public/3D_objects'));
+});
+
 gulp.task('fonts', () => {
   return gulp.src(require('main-bower-files')('**/*.{eot,svg,ttf,woff,woff2}', function (err) {})
     .concat('app/fonts/**/*'))
@@ -110,7 +115,7 @@ gulp.task('extras', () => {
 gulp.task('clean', del.bind(null, ['.tmp', 'dist/public']));
 
 gulp.task('serve', () => {
-  runSequence(['clean', 'wiredep'], ['styles', 'scripts', 'fonts'], () => {
+  runSequence(['clean', 'wiredep'], ['styles', 'scripts', 'images', '3D_objects', 'fonts'], () => {
     browserSync.init({
       notify: false,
       port: 9000,
@@ -125,7 +130,8 @@ gulp.task('serve', () => {
     gulp.watch([
       'app/*.html',
       'app/images/**/*',
-      '.tmp/fonts/**/*'
+      '.tmp/fonts/**/*',
+      'app/3D_objects/*'
     ]).on('change', reload);
 
     gulp.watch('app/styles/**/*.scss', ['styles']);
@@ -180,7 +186,7 @@ gulp.task('wiredep', () => {
     .pipe(gulp.dest('app'));
 });
 
-gulp.task('build', ['lint', 'html', 'images', 'fonts', 'extras'], () => {
+gulp.task('build', ['lint', 'html', 'images', '3D_objects', 'fonts', 'extras'], () => {
   return gulp.src('dist/public/**/*').pipe($.size({title: 'build', gzip: true}));
 });
 

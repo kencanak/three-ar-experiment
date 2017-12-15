@@ -1,9 +1,9 @@
 const EventEmitter = require('events');
 
 class PhysicsBase {
-  constructor(arScene, debugOpt) {
-    this.debugOpt = {
-      disable: true
+  constructor(arScene, opt) {
+    this.opt = {
+      debug: false
     };
 
     this.arScene = arScene;
@@ -13,7 +13,7 @@ class PhysicsBase {
 
     this.cannonDebugRenderer = null;
 
-    this.debugOpt = { ...this.debugOpt, ...debugOpt };
+    this.opt = { ...this.opt, ...opt };
 
     // events emitter
     this.events = new EventEmitter();
@@ -51,7 +51,7 @@ class PhysicsBase {
     this.groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/2);
     this.world.addBody(this.groundBody);
 
-    if (!this.debugOpt.disable) {
+    if (this.opt.debug) {
       this.cannonDebugRenderer = new THREE.CannonDebugRenderer(this.arScene, this.world);
     }
 
@@ -62,7 +62,7 @@ class PhysicsBase {
     // update the physics
     this.world.step(1/60);
 
-    if (!this.debugOpt.disable) {
+    if (this.opt.debug) {
       // we need to render the debugger
       this.cannonDebugRenderer.update();
     }

@@ -102,8 +102,18 @@ class ARBase {
     // real world and virtual world in sync.
     this._vrControls = new THREE.VRControls(this.camera);
 
-    const ambient = new THREE.AmbientLight(0xffffff, 1); // soft white light
+    const ambient = new THREE.AmbientLight(0xd5d3d3, 1); // soft white light
     this.scene.add(ambient);
+
+    // The materials in Poly models will render as a black mesh
+    // without lights in our scenes. Let's add an ambient light
+    // so our model can be scene, as well as a directional light
+    // for the shadow
+    const light = new THREE.DirectionalLight(0xffffff);
+    light.position.set(-40, -100, 0);
+
+    light.castShadow = true;
+    this.scene.add(light);
 
     this.events.emit('arbase-ready');
 
@@ -132,6 +142,7 @@ class ARBase {
   }
 
   onTouchMoveEvent(e) {
+    // so that it won't scroll the container
     e.preventDefault();
   }
 
