@@ -281,9 +281,6 @@ class PaperToss {
 
         model.scale.set(scale, scale, scale);
 
-        // Place the model very far to initialize
-        model.position.set(10000, 10000, 10000);
-
         resolve(model);
       });
     });
@@ -384,6 +381,8 @@ class PaperToss {
         .then((model) => {
           this.basket = model;
           this._scene.add(this.basket);
+
+          this.hideObject(this.basket);
         });
     }
 
