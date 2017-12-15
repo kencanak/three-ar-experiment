@@ -85,6 +85,8 @@ class PaperToss {
       this.reticle = new ARReticle(this._vrDisplay, this._scene);
       this.reticle.init();
 
+      this.loadBasketModel();
+
       this.initiatePhysics();
       this.render();
     });
@@ -209,6 +211,16 @@ class PaperToss {
     this.load3DModel('./3D_objects/otter_ball_model.obj', './3D_objects/otter_ball_materials.mtl', .25)
       .then((model) => {
         this.ballModel = model;
+      });
+  }
+
+  loadBasketModel() {
+    this.load3DModel('./3D_objects/bin_model.obj', './3D_objects/bin_materials.mtl', this.basketScale)
+      .then((model) => {
+        this.basket = model;
+        this._scene.add(this.basket);
+
+        this.hideObject(this.basket);
       });
   }
 
@@ -374,16 +386,6 @@ class PaperToss {
 
     if (this.reticle) {
       this.reticle.render();
-    }
-
-    if (!this.camera && !this.arBase.camera.position.y) {
-      this.load3DModel('./3D_objects/bin_model.obj', './3D_objects/bin_materials.mtl', this.basketScale)
-        .then((model) => {
-          this.basket = model;
-          this._scene.add(this.basket);
-
-          this.hideObject(this.basket);
-        });
     }
 
     // Update ball positions
