@@ -1,7 +1,7 @@
 # three-ar-experiment
 
 ## Preview
-[![Alt text](https://img.youtube.com/vi/WGZwcM6rJGI/0.jpg)](https://www.youtube.com/watch?v=WGZwcM6rJGI)
+[![Alt text](https://img.youtube.com/vi/iJ_7b5HpLp4/0.jpg)](https://www.youtube.com/watch?v=iJ_7b5HpLp4)
 
 ## Demo link
 https://three-ar-experiment.herokuapp.com/
