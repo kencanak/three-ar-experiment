@@ -229,7 +229,15 @@ class PaperToss {
       return;
     }
 
-    const shootDirection = this._camera.getWorldDirection();
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    mouse.x = 0;
+    mouse.y = 0;
+
+    raycaster.setFromCamera(mouse, this._camera);
+
+    const shootDirection = raycaster.ray.direction.normalize();
 
     const ballMesh = this.ballModel.clone();
 
