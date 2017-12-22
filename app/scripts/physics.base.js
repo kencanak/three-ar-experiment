@@ -60,7 +60,7 @@ class PhysicsBase {
 
   render() {
     // update the physics
-    this.world.step(1/60);
+    this.world.step(1/90);
 
     if (this.opt.debug) {
       // we need to render the debugger
