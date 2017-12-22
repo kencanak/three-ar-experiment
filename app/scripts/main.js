@@ -286,7 +286,7 @@ class PaperToss {
 
     var getCurrentPosition = new THREE.Vector3( );
     getCurrentPosition.setFromMatrixPosition( this.ballsReady.matrixWorld );
-    ballBody.position.copy(getComputedStyle);
+    ballBody.position.copy(getCurrentPosition);
 
     // detach it from camera and add it to the scene
     // credits to Skezo
@@ -454,7 +454,7 @@ class PaperToss {
         this.reticle.hide();
         // this.showHideBallHolder();
       } else {
-        // remove the ball from the ready position
+        // remove the ball from the ready
         if (this.ballsReady) {
           this._camera.remove(this.ballsReady);
         }
