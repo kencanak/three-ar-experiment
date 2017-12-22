@@ -37,6 +37,14 @@ class PaperToss {
     this.basketHeight = 0.35;
     this.basketScale = .8;
 
+    this.lastFrameData = {
+      x: 0,
+      y: 0,
+      z: 0
+    };
+
+    this.lastFrameUpdate = 0;
+
     // the base width and length value is .2 and .15 respectively
     this.basketWidth = .2 * this.basketScale;
     this.basketLength = .15 * this.basketScale;
@@ -45,6 +53,7 @@ class PaperToss {
     this.ballModel = null;
 
     this.balls = [];
+    this.ballsReady = null;
     this.ballsPhysics = [];
     this._world = null;
     this._groundBody = null;
@@ -85,6 +94,9 @@ class PaperToss {
       this.reticle = new ARReticle(this._vrDisplay, this._scene);
       this.reticle.init();
 
+      // add camera into the scene
+      this._scene.add(this._camera);
+
       this.loadBasketModel();
 
       this.initiatePhysics();
@@ -104,7 +116,7 @@ class PaperToss {
       this.swipePosition.startY = e.touches[0].pageY;
       this.swipePosition.startTime = e.timeStamp;
 
-      this.paperTossTouchEvent(e);
+      this.tossingTouchEvent(e);
     });
 
     this.arBase.events.on('arbase-touched-end', (e) => {
@@ -130,7 +142,7 @@ class PaperToss {
     this.basketLocationButton.addEventListener('touchstart', this.setBinPositionButtonState.bind(this), false);
   }
 
-  paperTossTouchEvent(e) {
+  tossingTouchEvent(e) {
     // Inspect the event object and generate normalize screen coordinates
     // (between 0 and 1) for the screen position.
     const xPos = e.touches[0].pageX / window.innerWidth;
@@ -208,7 +220,7 @@ class PaperToss {
   }
 
   setBallModel() {
-    this.load3DModel('./3D_objects/otter_ball_model.obj', './3D_objects/otter_ball_materials.mtl', .25)
+    this.load3DModel('./3D_objects/otter_ball_model.obj', './3D_objects/otter_ball_materials.mtl', .15)
       .then((model) => {
         this.ballModel = model;
       });
@@ -224,10 +236,22 @@ class PaperToss {
       });
   }
 
+  setBallPosition() {
+    this.ballsReady = this.ballModel.clone();
+
+    this.ballsReady.scale.set(.015, .015, .015);
+
+    this.ballsReady.position.set(0, -.013, -.03);
+
+    this._camera.add(this.ballsReady);
+  }
+
   throwBall() {
-    if (!this.basketPositionLocked) {
+    if (!this.basketPositionLocked || !this.ballsReady) {
       return;
     }
+
+    this.balls.push(this.ballsReady);
 
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
@@ -238,25 +262,6 @@ class PaperToss {
     raycaster.setFromCamera(mouse, this._camera);
 
     const shootDirection = raycaster.ray.direction.normalize();
-
-    const ballMesh = this.ballModel.clone();
-
-    this.balls.push(ballMesh);
-
-    this._scene.add(ballMesh);
-
-    // let's place the paper ball at touch point
-    let ballBody = new CANNON.Body({
-      mass: 0.1,
-      material: new CANNON.Material()
-    });
-
-    ballBody.addShape(this.ballShape);
-    ballBody.linearDamping = 0;
-
-    this.ballsPhysics.push(ballBody);
-
-    this._world.addBody(ballBody);
 
     // compute swipe distance
     const swipeDist = Math.sqrt(Math.pow((this.swipePosition.endX - this.swipePosition.startX), 2) + Math.pow((this.swipePosition.endY - this.swipePosition.startY), 2));
@@ -273,13 +278,37 @@ class PaperToss {
     const zVel = shootDirection.z - velocity;
     const zRatio = zVel / shootDirection.z;
 
+     // let's place the paper ball at touch point
+     let ballBody = new CANNON.Body({
+      mass: 0.1,
+      material: new CANNON.Material()
+    });
+
+    var getCurrentPosition = new THREE.Vector3( );
+    getCurrentPosition.setFromMatrixPosition( this.ballsReady.matrixWorld );
+    ballBody.position.copy(getComputedStyle);
+
+    // detach it from camera and add it to the scene
+    // credits to Skezo
+    THREE.SceneUtils.detach( this.ballsReady, this._camera, this._scene );
+    this._camera.updateMatrixWorld();
+
+    ballBody.addShape(this.ballShape);
+    ballBody.linearDamping = 0;
+
+    this.ballsPhysics.push(ballBody);
+
+    this._world.addBody(ballBody);
+
     ballBody.velocity.set(shootDirection.x * zRatio,
       shootDirection.y + velocity,
       shootDirection.z - velocity);
 
-    ballBody.position.set(this._camera.position.x, this._camera.position.y - .08, this._camera.position.z);
+    this.ballsReady = null;
 
-    ballMesh.position.set(this._camera.position.x, this._camera.position.y - .08, this._camera.position.z);
+    setTimeout(() => {
+      this.setBallPosition();
+    }, 1000);
   }
 
   load3DModel(objPath, mtlPath, scale) {
@@ -400,6 +429,7 @@ class PaperToss {
     for(let i=0; i < this.balls.length; i++){
       if (this.ballsPhysics[i]) {
         this.balls[i].position.copy(this.ballsPhysics[i].position);
+        this.balls[i].scale.set(.25, .25, .25);
         this.balls[i].quaternion.copy(this.ballsPhysics[i].quaternion);
       }
     }
@@ -419,9 +449,16 @@ class PaperToss {
 
     if (this.reticle) {
       if (this.basketPositionLocked) {
+        // set ball shooting position
+        this.setBallPosition();
         this.reticle.hide();
         // this.showHideBallHolder();
       } else {
+        // remove the ball from the ready position
+        if (this.ballsReady) {
+          this._camera.remove(this.ballsReady);
+        }
+
         this.reticle.show();
       }
     }

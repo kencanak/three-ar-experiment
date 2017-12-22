@@ -153,6 +153,8 @@ class ARBase {
   }
 
   render() {
+    // this.camera.updateMatrixWorld();
+
     // Render the device's camera stream on screen first of all.
     // It allows to get the right pose synchronized with the right frame.
     this._arView.render();
