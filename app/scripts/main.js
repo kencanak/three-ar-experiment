@@ -35,7 +35,7 @@ class PaperToss {
     // 3d objects
     this.basket = null;
     this.basketHeight = 0.35;
-    this.basketScale = .8;
+    this.basketScale = .7;
 
     this.lastFrameData = {
       x: 0,
@@ -239,9 +239,9 @@ class PaperToss {
   setBallPosition() {
     this.ballsReady = this.ballModel.clone();
 
-    this.ballsReady.scale.set(.015, .015, .015);
+    this.ballsReady.scale.set(.12, .12, .12);
 
-    this.ballsReady.position.set(0, -.013, -.03);
+    this.ballsReady.position.set(0, -.048, -.15);
 
     this._camera.add(this.ballsReady);
   }
@@ -254,14 +254,43 @@ class PaperToss {
     this.balls.push(this.ballsReady);
 
     const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
 
-    mouse.x = 0;
-    mouse.y = 0;
+    // ref: https://stackoverflow.com/questions/13055214/mouse-canvas-x-y-to-three-js-world-x-y-z, last post
+    const mousePosition = new THREE.Vector3();
 
-    raycaster.setFromCamera(mouse, this._camera);
+    // try to get ball throw direction from the mouse position
+    mousePosition.set((this.swipePosition.endX / window.innerWidth) * 2 - 1, -(this.swipePosition.endY / window.innerHeight) * 2 + 1, .5); // z = 0.5 important!
+
+    mousePosition.unproject(this._camera);
+
+    raycaster.set(this._camera.position, mousePosition.sub(this._camera.position).normalize());
 
     const shootDirection = raycaster.ray.direction.normalize();
+
+     // let's place the paper ball at touch point
+     let ballBody = new CANNON.Body({
+      mass: 0.1,
+      material: new CANNON.Material()
+    });
+
+    const ballPosition = new THREE.Vector3();
+    const ballQuaternion = new THREE.Quaternion();
+    const ballScale = new THREE.Vector3();
+
+    this.ballsReady.matrixWorld.decompose( ballPosition, ballQuaternion, ballScale );
+    ballBody.position.copy(ballPosition);
+
+    // detach it from camera and add it to the scene
+    // credits to Skezo
+    THREE.SceneUtils.detach( this.ballsReady, this._camera, this._scene );
+    this._camera.updateMatrixWorld();
+
+    ballBody.addShape(this.ballShape);
+    ballBody.linearDamping = 0;
+
+    this.ballsPhysics.push(ballBody);
+
+    this._world.addBody(ballBody);
 
     // compute swipe distance
     const swipeDist = Math.sqrt(Math.pow((this.swipePosition.endX - this.swipePosition.startX), 2) + Math.pow((this.swipePosition.endY - this.swipePosition.startY), 2));
@@ -278,29 +307,7 @@ class PaperToss {
     const zVel = shootDirection.z - velocity;
     const zRatio = zVel / shootDirection.z;
 
-     // let's place the paper ball at touch point
-     let ballBody = new CANNON.Body({
-      mass: 0.1,
-      material: new CANNON.Material()
-    });
-
-    var getCurrentPosition = new THREE.Vector3( );
-    getCurrentPosition.setFromMatrixPosition( this.ballsReady.matrixWorld );
-    ballBody.position.copy(getCurrentPosition);
-
-    // detach it from camera and add it to the scene
-    // credits to Skezo
-    THREE.SceneUtils.detach( this.ballsReady, this._camera, this._scene );
-    this._camera.updateMatrixWorld();
-
-    ballBody.addShape(this.ballShape);
-    ballBody.linearDamping = 0;
-
-    this.ballsPhysics.push(ballBody);
-
-    this._world.addBody(ballBody);
-
-    ballBody.velocity.set(shootDirection.x * zRatio,
+    ballBody.velocity.set((shootDirection.x * zRatio),
       shootDirection.y + velocity,
       shootDirection.z - velocity);
 
@@ -429,7 +436,7 @@ class PaperToss {
     for(let i=0; i < this.balls.length; i++){
       if (this.ballsPhysics[i]) {
         this.balls[i].position.copy(this.ballsPhysics[i].position);
-        this.balls[i].scale.set(.25, .25, .25);
+        // this.balls[i].scale.set(.25, .25, .25);
         this.balls[i].quaternion.copy(this.ballsPhysics[i].quaternion);
       }
     }
