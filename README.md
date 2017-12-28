@@ -49,7 +49,7 @@ https://three-ar-experiment.herokuapp.com/
 ## TODO
 1. [ ] ~~add in trajectory line~~
 2. [x] add in swipe to throw thingy
-2. [ ] improve user experience
-3. [ ] proper game play
-4. [ ] add in fancy environment, we need some *pennywise* here, you'll float too!
-5. [x] add in gulp task for deploying to `gcloud` or `heroku`
+3. [ ] improve user experience
+4. [x] proper game play add in score feat, need a score limit though
+5. [ ] add in fancy environment, and user feedback, we need some *pennywise* here, you'll float too!
+6. [x] add in gulp task for deploying to `gcloud` or `heroku`
