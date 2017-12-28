@@ -494,7 +494,7 @@ class PaperToss {
     this.ballsPhysics.splice(ballIndex, 1);
 
     this._scene.remove(ball);
-    this._world.remove(ball);
+    this._world.remove(ballBody);
   }
 
   padNumbers(number, size) {
