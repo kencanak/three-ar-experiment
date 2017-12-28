@@ -12,6 +12,7 @@ class PaperToss {
     this.canvas = document.getElementById('scene_wrapper');
     this.basketLocationButton = document.getElementById('basket_location_button');
     this.messageWrapper = document.getElementById('message_wrapper');
+    this.scoreBoard = document.getElementById('score_board');
 
     this.arBase = null;
     this.physicsBase = null;
@@ -31,6 +32,7 @@ class PaperToss {
     this.basketPositionLocked = false;
     this.basketPlaced = false;
     this.gameBegin = false;
+    this.currentScore = 0;
 
     // 3d objects
     this.basket = null;
@@ -49,6 +51,7 @@ class PaperToss {
     this.basketWidth = .2 * this.basketScale;
     this.basketLength = .15 * this.basketScale;
     this.basketWall = {};
+    this.basketBBox = null;
 
     this.ballModel = null;
 
@@ -165,12 +168,21 @@ class PaperToss {
         this.basketPlaced = true;
         const hit = hits[0];
 
+        this.showObject(this.basket);
+
         // Use the `placeObjectAtHit` utility to position
         // the cube where the hit occurred
         THREE.ARUtils.placeObjectAtHit(this.basket, hit, true, 1);
 
         // move the cannonjs groundbody accordingly
         this._groundBody.position.copy(this.basket.position);
+
+        const bbox = new THREE.BoxHelper(this.basket, 0xff0000);
+        bbox.update();
+
+        bbox.geometry.computeBoundingBox();
+
+        this.basketBBox = bbox.geometry.boundingBox;
 
         Object.keys(this.basketWall).forEach((key) => {
           if (key !== 'created') {
@@ -230,6 +242,7 @@ class PaperToss {
     this.load3DModel('./3D_objects/bin_model.obj', './3D_objects/bin_materials.mtl', this.basketScale)
       .then((model) => {
         this.basket = model;
+
         this._scene.add(this.basket);
 
         this.hideObject(this.basket);
@@ -250,6 +263,8 @@ class PaperToss {
     if (!this.basketPositionLocked || !this.ballsReady) {
       return;
     }
+
+    this.ballsReady.ballIndex = this.balls.length;
 
     this.balls.push(this.ballsReady);
 
@@ -288,6 +303,12 @@ class PaperToss {
 
     ballBody.addShape(this.ballShape);
     ballBody.linearDamping = 0;
+    ballBody.ballIndex = this.ballsReady.ballIndex;
+
+    // add collision event listener to the ballbody
+    ballBody.addEventListener('collide', (e) => {
+      this.checkScore(null, e);
+    });
 
     this.ballsPhysics.push(ballBody);
 
@@ -406,11 +427,14 @@ class PaperToss {
 
     Object.keys(sidesInfo).forEach((side) => {
       this.basketWall[side] = new CANNON.Body({
-        mass: 0,
-        collisionResponse: true
+        mass: 0
       });
 
-      this.basketWall[side].addShape(side === 'right' || side === 'left' ? boxShape.side : boxShape.topBottom);
+      this.basketWall[side].isWall = true;
+
+      const shape = side === 'right' || side === 'left' ? boxShape.side : boxShape.topBottom;
+
+      this.basketWall[side].addShape(shape);
 
       this.basketWall[side].position.copy(sidesInfo[side].pos);
       this.basketWall[side].quaternion.setFromEuler(sidesInfo[side].rotation.x, sidesInfo[side].rotation.y, sidesInfo[side].rotation.z);
@@ -420,9 +444,61 @@ class PaperToss {
     this.basketWall.created = true;
   }
 
+  showObject(obj) {
+    obj.visible = true;
+  }
+
   hideObject(obj) {
     // Place the object very far to initialize
-    obj.position.set(10000, 10000, 10000);
+    // obj.position.set(10000, 10000, 10000);
+    obj.visible = false;
+  }
+
+  checkScore(ball, collisionProps) {
+    if (ball && !ball.scoreAssigned) {
+      if (this.basketBBox.containsPoint(ball.position)) {
+        ball.scoreAssigned = true;
+        this.currentScore += 1;
+        this.scoreBoard.innerHTML = this.padNumbers(this.currentScore, 3);
+        console.log('score!');
+        return;
+      }
+    }
+
+    if (collisionProps) {
+      // if the collision body isGround prop is true, and score has not been assigned to the ball
+      // time to clear it
+      if (!collisionProps.body.isGround && !this.balls[collisionProps.target.ballIndex].scoreAssigned) {
+        this.balls[collisionProps.target.ballIndex].scoreAssigned = true;
+        console.log('missed');
+
+        // remove ball after 3 seconds
+        setTimeout(() => {
+          this.retireBall(collisionProps.target.ballIndex);
+        }, 3000);
+        return;
+      }
+    }
+  }
+
+  retireBall(ballIndex) {
+    const ball = this.balls[ballIndex];
+    const ballBody = this.ballsPhysics[ballIndex];
+
+    this.balls.splice(ballIndex, 1);
+    this.ballsPhysics.splice(ballIndex, 1);
+
+    this._scene.remove(ball);
+    this._world.remove(ball);
+  }
+
+  padNumbers(number, size) {
+    var s = String(number);
+    while (s.length < (size || 2)) {
+      s = `0${s}`;
+    }
+
+    return s;
   }
 
   render() {
@@ -439,6 +515,8 @@ class PaperToss {
         this.balls[i].position.copy(this.ballsPhysics[i].position);
         // this.balls[i].scale.set(.25, .25, .25);
         this.balls[i].quaternion.copy(this.ballsPhysics[i].quaternion);
+
+        this.checkScore(this.balls[i]);
       }
     }
 
