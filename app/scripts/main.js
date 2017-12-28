@@ -16,7 +16,7 @@ class PaperToss {
     this.arBase = null;
     this.physicsBase = null;
 
-    this.ballShape = new CANNON.Sphere(0.05);
+    this.ballShape = new CANNON.Sphere(0.02);
 
     this.swipePosition = {
       startX: 0,
@@ -220,7 +220,7 @@ class PaperToss {
   }
 
   setBallModel() {
-    this.load3DModel('./3D_objects/otter_ball_model.obj', './3D_objects/otter_ball_materials.mtl', .15)
+    this.load3DModel('./3D_objects/ball_model.obj', './3D_objects/ball_materials.mtl', .13)
       .then((model) => {
         this.ballModel = model;
       });
@@ -239,9 +239,9 @@ class PaperToss {
   setBallPosition() {
     this.ballsReady = this.ballModel.clone();
 
-    this.ballsReady.scale.set(.12, .12, .12);
+    // this.ballsReady.scale.set(.12, .12, .12);
 
-    this.ballsReady.position.set(0, -.048, -.15);
+    this.ballsReady.position.set(0, -.071, -.15);
 
     this._camera.add(this.ballsReady);
   }
@@ -278,6 +278,7 @@ class PaperToss {
     const ballScale = new THREE.Vector3();
 
     this.ballsReady.matrixWorld.decompose( ballPosition, ballQuaternion, ballScale );
+
     ballBody.position.copy(ballPosition);
 
     // detach it from camera and add it to the scene
