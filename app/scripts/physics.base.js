@@ -47,6 +47,7 @@ class PhysicsBase {
     // Create a plane
     const groundShape = new CANNON.Plane();
     this.groundBody = new CANNON.Body({ mass: 0 });
+    this.groundBody.isGround = true;
     this.groundBody.addShape(groundShape);
     this.groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/2);
     this.world.addBody(this.groundBody);
