@@ -468,9 +468,10 @@ class PaperToss {
     if (collisionProps) {
       // if the collision body isGround prop is true, and score has not been assigned to the ball
       // time to clear it
-      if (!collisionProps.body.isGround && !this.balls[collisionProps.target.ballIndex].scoreAssigned) {
+      if (collisionProps.body.isGround
+        && this.balls[collisionProps.target.ballIndex]
+        && !this.balls[collisionProps.target.ballIndex].scoreAssigned) {
         this.balls[collisionProps.target.ballIndex].scoreAssigned = true;
-        console.log('missed');
 
         // remove ball after 3 seconds
         setTimeout(() => {
@@ -482,6 +483,10 @@ class PaperToss {
   }
 
   retireBall(ballIndex) {
+    if (!this._scene || !this._world) {
+      return;
+    }
+
     const ball = this.balls[ballIndex];
     const ballBody = this.ballsPhysics[ballIndex];
 
