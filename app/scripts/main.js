@@ -232,7 +232,7 @@ class PaperToss {
   }
 
   setBallModel() {
-    this.load3DModel('./3D_objects/ball_model.obj', './3D_objects/ball_materials.mtl', .13)
+    this.load3DModel('./3D_objects/ball_model.obj', './3D_objects/ball_materials.mtl', .2)
       .then((model) => {
         this.ballModel = model;
       });
@@ -251,8 +251,6 @@ class PaperToss {
 
   setBallPosition() {
     this.ballsReady = this.ballModel.clone();
-
-    // this.ballsReady.scale.set(.12, .12, .12);
 
     this.ballsReady.position.set(0, -.071, -.15);
 
