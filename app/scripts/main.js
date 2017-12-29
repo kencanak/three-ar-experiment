@@ -52,6 +52,7 @@ class PaperToss {
     this.basketLength = .15 * this.basketScale;
     this.basketWall = {};
     this.basketBBox = null;
+    this.ballShot = 0;
 
     this.ballModel = null;
 
@@ -266,7 +267,7 @@ class PaperToss {
       return;
     }
 
-    this.ballsReady.ballIndex = this.balls.length;
+    this.ballsReady.ballIndex = this.ballShot;
 
     const raycaster = new THREE.Raycaster();
 
@@ -338,10 +339,7 @@ class PaperToss {
       shootDirection.z - velocity);
 
     this.ballsReady = null;
-
-    setTimeout(() => {
-      this.setBallPosition();
-    }, 1000);
+    this.ballShot += 1;
   }
 
   computeDistance(pointsSet) {
@@ -462,16 +460,28 @@ class PaperToss {
     obj.visible = false;
   }
 
+  assignScore(dist) {
+    if (dist < 1) {
+      this.currentScore += 1;
+    } else if (dist > 1 && dist < 2) {
+      this.currentScore += 2;
+    } else if (dist > 2 && dist < 3) {
+      this.currentScore += 3;
+    } else if (dist > 3) {
+      this.currentScore += 5;
+    }
+
+    this.scoreBoard.innerHTML = this.padNumbers(this.currentScore, 3);
+  }
+
   checkScore(ball, collisionProps) {
     if (ball && !ball.scoreAssigned) {
       if (this.basketBBox.containsPoint(ball.position)) {
         ball.scoreAssigned = true;
-        this.currentScore += 1;
-        this.scoreBoard.innerHTML = this.padNumbers(this.currentScore, 3);
 
+        this.assignScore(ball.throwPosition.distanceTo(this.basket.position));
 
-        console.log('distance:', ball.throwPosition.distanceTo(this.basket.position));
-        console.log('score!');
+        this.setBallPosition();
         return;
       }
     }
@@ -483,26 +493,27 @@ class PaperToss {
         && this.balls[collisionProps.target.ballIndex]
         && !this.balls[collisionProps.target.ballIndex].scoreAssigned) {
         this.balls[collisionProps.target.ballIndex].scoreAssigned = true;
+        this.setBallPosition();
 
         // remove ball after 3 seconds
-        // setTimeout(() => {
-        //   this.retireBall(collisionProps.target.ballIndex);
-        // }, 3000);
+        setTimeout(() => {
+          this.retireBall(collisionProps.target.ballIndex);
+        }, 3000);
         return;
       }
     }
   }
 
   retireBall(ballIndex) {
-    if (!this._scene || !this._world) {
-      return;
-    }
-
     const ball = this.balls[ballIndex];
     const ballBody = this.ballsPhysics[ballIndex];
 
-    this.balls.splice(ballIndex, 1);
-    this.ballsPhysics.splice(ballIndex, 1);
+    if (!this._scene || this._world === null) {
+      return;
+    }
+
+    this.balls.splice(ballIndex, 1, null);
+    this.ballsPhysics.splice(ballIndex, 1, null);
 
     this._scene.remove(ball);
     this._world.remove(ballBody);
