@@ -270,8 +270,6 @@ class PaperToss {
 
     this.ballsReady.ballIndex = this.balls.length;
 
-    this.balls.push(this.ballsReady);
-
     const raycaster = new THREE.Raycaster();
 
     // ref: https://stackoverflow.com/questions/13055214/mouse-canvas-x-y-to-three-js-world-x-y-z, last post
@@ -300,6 +298,8 @@ class PaperToss {
 
     ballBody.position.copy(ballPosition);
 
+    this.ballsReady.throwPosition = ballPosition;
+
     // detach it from camera and add it to the scene
     // credits to Skezo
     THREE.SceneUtils.detach( this.ballsReady, this._camera, this._scene );
@@ -316,10 +316,12 @@ class PaperToss {
 
     this.ballsPhysics.push(ballBody);
 
+    this.balls.push(this.ballsReady);
+
     this._world.addBody(ballBody);
 
     // compute swipe distance
-    const swipeDist = Math.sqrt(Math.pow((this.swipePosition.endX - this.swipePosition.startX), 2) + Math.pow((this.swipePosition.endY - this.swipePosition.startY), 2));
+    const swipeDist = this.computeDistance(this.swipePosition);
 
     const timeDelta = this.swipePosition.endTime - this.swipePosition.startTime;
 
@@ -342,6 +344,10 @@ class PaperToss {
     setTimeout(() => {
       this.setBallPosition();
     }, 1000);
+  }
+
+  computeDistance(pointsSet) {
+    return Math.sqrt(Math.pow((pointsSet.endX - pointsSet.startX), 2) + Math.pow((pointsSet.endY - pointsSet.startY), 2));
   }
 
   load3DModel(objPath, mtlPath, scale) {
@@ -464,6 +470,9 @@ class PaperToss {
         ball.scoreAssigned = true;
         this.currentScore += 1;
         this.scoreBoard.innerHTML = this.padNumbers(this.currentScore, 3);
+
+
+        console.log('distance:', ball.throwPosition.distanceTo(this.basket.position));
         console.log('score!');
         return;
       }
