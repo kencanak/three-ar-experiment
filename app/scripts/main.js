@@ -33,6 +33,7 @@ class PaperToss {
     this.basketPlaced = false;
     this.gameBegin = false;
     this.currentScore = 0;
+    this.ballsMissed = 0;
 
     // 3d objects
     this.basket = null;
@@ -52,6 +53,7 @@ class PaperToss {
     this.basketLength = .15 * this.basketScale;
     this.basketWall = {};
     this.basketBBox = null;
+    this.ballShot = 0;
 
     this.ballModel = null;
 
@@ -77,7 +79,7 @@ class PaperToss {
 
     this.setBallModel();
 
-    this.showMessage(true);
+    this.showMessage(5000);
   }
 
   initiatePhysics() {
@@ -131,7 +133,7 @@ class PaperToss {
         // swipe up shouldn't throw the ball
         // no basket no balls, lol
         if (this.swipePosition.endY > this.swipePosition.startY && this.basketPositionLocked) {
-          this.showMessage(false, 'you are trying to be funny by swiping down. get it together ಠ▃ಠ');
+          this.showMessage(0, 'do you even toss? ◔_◔');
         }
 
         return;
@@ -182,6 +184,10 @@ class PaperToss {
 
         bbox.geometry.computeBoundingBox();
 
+        // to make sure that the ball always hit the bin's mouth
+        // since the bin's base is smaller than top
+        bbox.geometry.boundingBox.min.y = bbox.geometry.boundingBox.min.y + .3;
+
         this.basketBBox = bbox.geometry.boundingBox;
 
         Object.keys(this.basketWall).forEach((key) => {
@@ -210,13 +216,13 @@ class PaperToss {
           }
         });
 
-        this.showMessage(false, 'bin has been placed, you can now lock this position and begin throwing. (⌐■_■)');
+        this.showMessage(0, 'bin has been placed, you can now lock this position and begin throwing. (⌐■_■)');
         return;
       }
 
       this.hideObject(this.basket);
 
-      this.showMessage(false, 'invalid bin location, please try again ಠ▃ಠ');
+      this.showMessage(0, 'invalid bin location, please try again ಠ▃ಠ');
       return;
     }
   }
@@ -262,9 +268,7 @@ class PaperToss {
       return;
     }
 
-    this.ballsReady.ballIndex = this.balls.length;
-
-    this.balls.push(this.ballsReady);
+    this.ballsReady.ballIndex = this.ballShot;
 
     const raycaster = new THREE.Raycaster();
 
@@ -294,6 +298,8 @@ class PaperToss {
 
     ballBody.position.copy(ballPosition);
 
+    this.ballsReady.throwPosition = ballPosition;
+
     // detach it from camera and add it to the scene
     // credits to Skezo
     THREE.SceneUtils.detach( this.ballsReady, this._camera, this._scene );
@@ -310,10 +316,12 @@ class PaperToss {
 
     this.ballsPhysics.push(ballBody);
 
+    this.balls.push(this.ballsReady);
+
     this._world.addBody(ballBody);
 
     // compute swipe distance
-    const swipeDist = Math.sqrt(Math.pow((this.swipePosition.endX - this.swipePosition.startX), 2) + Math.pow((this.swipePosition.endY - this.swipePosition.startY), 2));
+    const swipeDist = this.computeDistance(this.swipePosition);
 
     const timeDelta = this.swipePosition.endTime - this.swipePosition.startTime;
 
@@ -332,10 +340,15 @@ class PaperToss {
       shootDirection.z - velocity);
 
     this.ballsReady = null;
+    this.ballShot += 1;
 
     setTimeout(() => {
       this.setBallPosition();
-    }, 1000);
+    }, 500);
+  }
+
+  computeDistance(pointsSet) {
+    return Math.sqrt(Math.pow((pointsSet.endX - pointsSet.startX), 2) + Math.pow((pointsSet.endY - pointsSet.startY), 2));
   }
 
   load3DModel(objPath, mtlPath, scale) {
@@ -452,13 +465,42 @@ class PaperToss {
     obj.visible = false;
   }
 
+  assignScore(dist) {
+    let msg = '';
+
+    if (dist === 0) {
+      if (this.ballsMissed % 5 === 0) {
+        msg = 'yawn... 눈_눈';
+      }
+    } else if (dist < 1 && dist > 0) {
+      this.currentScore += 1;
+      msg = 'cih! ◔_◔';
+    } else if (dist > 1 && dist < 2) {
+      this.currentScore += 2;
+      msg = 'mmmkay! ʘ‿ʘ';
+    } else if (dist > 2 && dist < 3) {
+      this.currentScore += 3;
+      msg = 'not bad! ᕦ(ò_óˇ)ᕤ';
+    } else if (dist > 3) {
+      this.currentScore += 5;
+      msg = 'woo hoo! ♪♪ ヽ(ˇ∀ˇ )ゞ';
+    }
+
+    if (dist > 0) {
+      // reset the ball missed count
+      this.ballsMissed = 0;
+    }
+
+    this.showMessage(1500, msg);
+    this.scoreBoard.innerHTML = this.padNumbers(this.currentScore, 3);
+  }
+
   checkScore(ball, collisionProps) {
     if (ball && !ball.scoreAssigned) {
       if (this.basketBBox.containsPoint(ball.position)) {
         ball.scoreAssigned = true;
-        this.currentScore += 1;
-        this.scoreBoard.innerHTML = this.padNumbers(this.currentScore, 3);
-        console.log('score!');
+
+        this.assignScore(ball.throwPosition.distanceTo(this.basket.position));
         return;
       }
     }
@@ -471,6 +513,9 @@ class PaperToss {
         && !this.balls[collisionProps.target.ballIndex].scoreAssigned) {
         this.balls[collisionProps.target.ballIndex].scoreAssigned = true;
 
+        this.ballsMissed += 1;
+        this.assignScore(0);
+
         // remove ball after 3 seconds
         setTimeout(() => {
           this.retireBall(collisionProps.target.ballIndex);
@@ -481,15 +526,15 @@ class PaperToss {
   }
 
   retireBall(ballIndex) {
-    if (!this._scene || !this._world) {
-      return;
-    }
-
     const ball = this.balls[ballIndex];
     const ballBody = this.ballsPhysics[ballIndex];
 
-    this.balls.splice(ballIndex, 1);
-    this.ballsPhysics.splice(ballIndex, 1);
+    if (!this._scene || this._world === null) {
+      return;
+    }
+
+    this.balls.splice(ballIndex, 1, null);
+    this.ballsPhysics.splice(ballIndex, 1, null);
 
     this._scene.remove(ball);
     this._world.remove(ballBody);
@@ -530,7 +575,7 @@ class PaperToss {
 
   setBinPositionButtonState() {
     if (!this.basketPlaced) {
-      this.showMessage(false, 'where is your basket dude ಠ▃ಠ');
+      this.showMessage(0, 'where is your basket dude ಠ▃ಠ');
       return;
     }
 
@@ -562,14 +607,19 @@ class PaperToss {
     elem.querySelector('.button--label').innerHTML = elem.querySelector('.button--label').getAttribute(iconState);
   }
 
-  showMessage(isIntro, msg) {
-    this.messageWrapper.style.display = 'block';
-
-    if (!isIntro) {
+  showMessage(timeout, msg) {
+    if (msg) {
       this.messageWrapper.innerHTML = msg;
+    }
+
+    if (this.messageWrapper.innerHTML) {
+      this.messageWrapper.style.display = 'block';
+    }
+
+    if (timeout > 0) {
       setTimeout(() => {
         this.hideMessage();
-      }, 5000);
+      }, timeout);
     }
   }
 
