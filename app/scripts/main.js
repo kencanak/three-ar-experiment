@@ -33,6 +33,7 @@ class PaperToss {
     this.basketPlaced = false;
     this.gameBegin = false;
     this.currentScore = 0;
+    this.ballsMissed = 0;
 
     // 3d objects
     this.basket = null;
@@ -78,7 +79,7 @@ class PaperToss {
 
     this.setBallModel();
 
-    this.showMessage(true);
+    this.showMessage(5000);
   }
 
   initiatePhysics() {
@@ -132,7 +133,7 @@ class PaperToss {
         // swipe up shouldn't throw the ball
         // no basket no balls, lol
         if (this.swipePosition.endY > this.swipePosition.startY && this.basketPositionLocked) {
-          this.showMessage(false, 'you are trying to be funny by swiping down. get it together ಠ▃ಠ');
+          this.showMessage(0, 'do you even toss? ◔_◔');
         }
 
         return;
@@ -215,13 +216,13 @@ class PaperToss {
           }
         });
 
-        this.showMessage(false, 'bin has been placed, you can now lock this position and begin throwing. (⌐■_■)');
+        this.showMessage(0, 'bin has been placed, you can now lock this position and begin throwing. (⌐■_■)');
         return;
       }
 
       this.hideObject(this.basket);
 
-      this.showMessage(false, 'invalid bin location, please try again ಠ▃ಠ');
+      this.showMessage(0, 'invalid bin location, please try again ಠ▃ಠ');
       return;
     }
   }
@@ -340,6 +341,10 @@ class PaperToss {
 
     this.ballsReady = null;
     this.ballShot += 1;
+
+    setTimeout(() => {
+      this.setBallPosition();
+    }, 500);
   }
 
   computeDistance(pointsSet) {
@@ -461,16 +466,32 @@ class PaperToss {
   }
 
   assignScore(dist) {
-    if (dist < 1) {
+    let msg = '';
+
+    if (dist === 0) {
+      if (this.ballsMissed % 5 === 0) {
+        msg = 'yawn... 눈_눈';
+      }
+    } else if (dist < 1 && dist > 0) {
       this.currentScore += 1;
+      msg = 'cih! ◔_◔';
     } else if (dist > 1 && dist < 2) {
       this.currentScore += 2;
+      msg = 'mmmkay! ʘ‿ʘ';
     } else if (dist > 2 && dist < 3) {
       this.currentScore += 3;
+      msg = 'not bad! ᕦ(ò_óˇ)ᕤ';
     } else if (dist > 3) {
       this.currentScore += 5;
+      msg = 'woo hoo! ♪♪ ヽ(ˇ∀ˇ )ゞ';
     }
 
+    if (dist > 0) {
+      // reset the ball missed count
+      this.ballsMissed = 0;
+    }
+
+    this.showMessage(1500, msg);
     this.scoreBoard.innerHTML = this.padNumbers(this.currentScore, 3);
   }
 
@@ -480,8 +501,6 @@ class PaperToss {
         ball.scoreAssigned = true;
 
         this.assignScore(ball.throwPosition.distanceTo(this.basket.position));
-
-        this.setBallPosition();
         return;
       }
     }
@@ -493,7 +512,9 @@ class PaperToss {
         && this.balls[collisionProps.target.ballIndex]
         && !this.balls[collisionProps.target.ballIndex].scoreAssigned) {
         this.balls[collisionProps.target.ballIndex].scoreAssigned = true;
-        this.setBallPosition();
+
+        this.ballsMissed += 1;
+        this.assignScore(0);
 
         // remove ball after 3 seconds
         setTimeout(() => {
@@ -554,7 +575,7 @@ class PaperToss {
 
   setBinPositionButtonState() {
     if (!this.basketPlaced) {
-      this.showMessage(false, 'where is your basket dude ಠ▃ಠ');
+      this.showMessage(0, 'where is your basket dude ಠ▃ಠ');
       return;
     }
 
@@ -586,14 +607,19 @@ class PaperToss {
     elem.querySelector('.button--label').innerHTML = elem.querySelector('.button--label').getAttribute(iconState);
   }
 
-  showMessage(isIntro, msg) {
-    this.messageWrapper.style.display = 'block';
-
-    if (!isIntro) {
+  showMessage(timeout, msg) {
+    if (msg) {
       this.messageWrapper.innerHTML = msg;
+    }
+
+    if (this.messageWrapper.innerHTML) {
+      this.messageWrapper.style.display = 'block';
+    }
+
+    if (timeout > 0) {
       setTimeout(() => {
         this.hideMessage();
-      }, 5000);
+      }, timeout);
     }
   }
 
