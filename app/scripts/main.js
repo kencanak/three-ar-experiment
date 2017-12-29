@@ -182,6 +182,10 @@ class PaperToss {
 
         bbox.geometry.computeBoundingBox();
 
+        // to make sure that the ball always hit the bin's mouth
+        // since the bin's base is smaller than top
+        bbox.geometry.boundingBox.min.y = bbox.geometry.boundingBox.min.y + .3;
+
         this.basketBBox = bbox.geometry.boundingBox;
 
         Object.keys(this.basketWall).forEach((key) => {
@@ -474,9 +478,9 @@ class PaperToss {
         this.balls[collisionProps.target.ballIndex].scoreAssigned = true;
 
         // remove ball after 3 seconds
-        setTimeout(() => {
-          this.retireBall(collisionProps.target.ballIndex);
-        }, 3000);
+        // setTimeout(() => {
+        //   this.retireBall(collisionProps.target.ballIndex);
+        // }, 3000);
         return;
       }
     }
