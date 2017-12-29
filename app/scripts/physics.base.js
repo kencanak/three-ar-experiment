@@ -33,13 +33,7 @@ class PhysicsBase {
     solver.iterations = 7;
     solver.tolerance = 0.1;
 
-    const split = true;
-
-    if(split) {
-      this.world.solver = new CANNON.SplitSolver(solver);
-    } else {
-      this.world.solver = solver;
-    }
+    this.world.solver = solver;
 
     this.world.gravity.set(0,-10,0);
     this.world.broadphase = new CANNON.NaiveBroadphase();
