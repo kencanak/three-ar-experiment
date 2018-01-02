@@ -647,6 +647,7 @@ class PaperToss {
           this._camera.remove(this.ballsReady);
         }
 
+        this.gamePause = false;
         this.hidePennywise();
 
         this.reticle.show();
