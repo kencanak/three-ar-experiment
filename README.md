@@ -45,6 +45,11 @@ https://three-ar-experiment.herokuapp.com/
   `git subtree push --prefix dist/ heroku master`
 8. once done, you can now preview the app from `[heroku app url]`
 
+## Sounds used
+All sounds used are downloaded from https://freesound.org
+
+Please *DO NOT* re-use any of the sounds for commercial purpose
+
 
 ## TODO
 1. [ ] ~~add in trajectory line~~
