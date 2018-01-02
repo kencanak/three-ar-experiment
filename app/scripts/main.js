@@ -472,10 +472,10 @@ class PaperToss {
       if (this.ballsMissed % 5 === 0) {
         msg = 'yawn... 눈_눈';
       }
-    } else if (dist < 1 && dist > 0) {
+    } else if (dist < 1.5 && dist > 0) {
       this.currentScore += 1;
       msg = 'cih! ◔_◔';
-    } else if (dist > 1 && dist < 2) {
+    } else if (dist > 1.5 && dist < 2) {
       this.currentScore += 2;
       msg = 'mmmkay! ʘ‿ʘ';
     } else if (dist > 2 && dist < 3) {
@@ -491,7 +491,7 @@ class PaperToss {
       this.ballsMissed = 0;
     }
 
-    this.showMessage(1500, msg);
+    this.showMessage(5000, msg);
     this.scoreBoard.innerHTML = this.padNumbers(this.currentScore, 3);
   }
 
