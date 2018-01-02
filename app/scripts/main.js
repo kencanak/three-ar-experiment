@@ -486,6 +486,7 @@ class PaperToss {
 
   showPennywise() {
     if (this.ballsMissed / this.maxMissedBallsPerSet === 1) {
+      this.pennywise.visible = true;
       this.pennywise.position.copy(this.basket.position);
 
       this.pennywise.position.z = -4;
@@ -502,8 +503,7 @@ class PaperToss {
   }
 
   hidePennywise() {
-    this._scene.remove(this.pennywise);
-    this.pennywise = null;
+    this.pennywise.visible = false;
   }
 
   showObject(obj) {
