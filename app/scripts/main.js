@@ -530,19 +530,19 @@ class PaperToss {
     } else if (dist < 0.75 && dist > 0) {
       this.currentScore += 1;
       msg = 'cih! ◔_◔';
-      this._soundsBase.playSound('win-1');
+      this._soundsBase.playSound('win1');
     } else if (dist > 0.75 && dist < 1.5) {
       this.currentScore += 2;
       msg = 'mmmkay! ʘ‿ʘ';
-      this._soundsBase.playSound('win-2');
+      this._soundsBase.playSound('win2');
     } else if (dist > 1.5 && dist < 2.5) {
       this.currentScore += 3;
       msg = 'not bad! ᕦ(ò_óˇ)ᕤ';
-      this._soundsBase.playSound('win-3');
+      this._soundsBase.playSound('win3');
     } else if (dist > 2.5) {
       this.currentScore += 5;
       msg = 'woo hoo! ♪♪ ヽ(ˇ∀ˇ )ゞ';
-      this._soundsBase.playSound('win-4');
+      this._soundsBase.playSound('win4');
     }
 
     if (dist > 0) {
