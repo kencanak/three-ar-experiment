@@ -15,6 +15,14 @@ class PaperToss {
     this.messageWrapper = document.getElementById('message_wrapper');
     this.scoreBoard = document.getElementById('score_board');
 
+    const texture = new THREE.TextureLoader().load( 'images/Pennywise.png' );
+    const geometry = new THREE.PlaneGeometry( 0.9954954954, 2 ); //0.4977477477
+
+    // immediately use the texture for material creation
+    const material = new THREE.MeshBasicMaterial( { map: texture, transparent: true } );
+
+    this.pennywise = new THREE.Mesh(geometry, material);
+
     this.gamePause = false;
 
     this._soundsBase = new SoundsBase();
@@ -477,15 +485,7 @@ class PaperToss {
   }
 
   showPennywise() {
-    if (!this.pennywise) {
-      const texture = new THREE.TextureLoader().load( 'images/Pennywise.png' );
-      const geometry = new THREE.PlaneGeometry( 0.9954954954, 2 ); //0.4977477477
-
-      // immediately use the texture for material creation
-      const material = new THREE.MeshBasicMaterial( { map: texture, transparent: true } );
-
-      this.pennywise = new THREE.Mesh(geometry, material);
-
+    if (this.ballsMissed / this.maxMissedBallsPerSet === 1) {
       this.pennywise.position.copy(this.basket.position);
 
       this.pennywise.position.z = -4;
