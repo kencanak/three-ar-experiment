@@ -5,6 +5,7 @@ import * as threeARJs from 'three.ar.js';
 import ARBase from './ar.base.js';
 import ARReticle from './ar.reticle.js';
 import PhysicsBase from './physics.base.js';
+import SoundsBase from './sounds.base.js';
 
 class PaperToss {
   constructor() {
@@ -13,6 +14,21 @@ class PaperToss {
     this.basketLocationButton = document.getElementById('basket_location_button');
     this.messageWrapper = document.getElementById('message_wrapper');
     this.scoreBoard = document.getElementById('score_board');
+
+    this.gamePause = false;
+
+    this._soundsBase = new SoundsBase();
+
+    this._soundsBase.events.on('game-over-tune-start', () => {
+      // game over
+      this.gamePause = true;
+    });
+
+    this._soundsBase.events.on('game-over-tune-end', () => {
+      // game over
+      this.showMessage(5000, 'game over!');
+      this.setBinPositionButtonState();
+    });
 
     this.arBase = null;
     this.physicsBase = null;
@@ -34,6 +50,7 @@ class PaperToss {
     this.gameBegin = false;
     this.currentScore = 0;
     this.ballsMissed = 0;
+    this.maxMissedBallsPerSet = 3;
 
     // 3d objects
     this.basket = null;
@@ -125,6 +142,10 @@ class PaperToss {
     });
 
     this.arBase.events.on('arbase-touched-end', (e) => {
+      if (this.gamePause) {
+        return;
+      }
+
       this.swipePosition.endX = e.changedTouches[0].pageX;
       this.swipePosition.endY = e.changedTouches[0].pageY;
       this.swipePosition.endTime = e.timeStamp;
@@ -455,6 +476,36 @@ class PaperToss {
     this.basketWall.created = true;
   }
 
+  showPennywise() {
+    if (!this.pennywise) {
+      const texture = new THREE.TextureLoader().load( 'images/Pennywise.png' );
+      const geometry = new THREE.PlaneGeometry( 0.9954954954, 2 ); //0.4977477477
+
+      // immediately use the texture for material creation
+      const material = new THREE.MeshBasicMaterial( { map: texture, transparent: true } );
+
+      this.pennywise = new THREE.Mesh(geometry, material);
+
+      this.pennywise.position.copy(this.basket.position);
+
+      this.pennywise.position.z = -5;
+
+      this.pennywise.position.y +=.5;
+
+      this._scene.add(this.pennywise);
+
+      return;
+    }
+
+    this.pennywise.position.x = this.pennywise.position.x + (this.ballsMissed / this.maxMissedBallsPerSet === 2 ? .6 : -.6);
+    this.pennywise.position.z += 2;
+  }
+
+  hidePennywise() {
+    this._scene.remove(this.pennywise);
+    this.pennywise = null;
+  }
+
   showObject(obj) {
     obj.visible = true;
   }
@@ -469,21 +520,29 @@ class PaperToss {
     let msg = '';
 
     if (dist === 0) {
-      if (this.ballsMissed % 5 === 0) {
+      if (this.ballsMissed % this.maxMissedBallsPerSet === 0) {
         msg = 'yawn... 눈_눈';
+
+        this.showPennywise();
+
+        this._soundsBase.playSound(`fail${this.ballsMissed/this.maxMissedBallsPerSet}`);
       }
-    } else if (dist < 1.5 && dist > 0) {
+    } else if (dist < 0.75 && dist > 0) {
       this.currentScore += 1;
       msg = 'cih! ◔_◔';
-    } else if (dist > 1.5 && dist < 2) {
+      this._soundsBase.playSound('win-1');
+    } else if (dist > 0.75 && dist < 1.5) {
       this.currentScore += 2;
       msg = 'mmmkay! ʘ‿ʘ';
-    } else if (dist > 2 && dist < 3) {
+      this._soundsBase.playSound('win-2');
+    } else if (dist > 1.5 && dist < 2.5) {
       this.currentScore += 3;
       msg = 'not bad! ᕦ(ò_óˇ)ᕤ';
-    } else if (dist > 3) {
+      this._soundsBase.playSound('win-3');
+    } else if (dist > 2.5) {
       this.currentScore += 5;
       msg = 'woo hoo! ♪♪ ヽ(ˇ∀ˇ )ゞ';
+      this._soundsBase.playSound('win-4');
     }
 
     if (dist > 0) {
@@ -515,11 +574,6 @@ class PaperToss {
 
         this.ballsMissed += 1;
         this.assignScore(0);
-
-        // remove ball after 3 seconds
-        setTimeout(() => {
-          this.retireBall(collisionProps.target.ballIndex);
-        }, 3000);
         return;
       }
     }
@@ -592,6 +646,8 @@ class PaperToss {
         if (this.ballsReady) {
           this._camera.remove(this.ballsReady);
         }
+
+        this.hidePennywise();
 
         this.reticle.show();
       }
