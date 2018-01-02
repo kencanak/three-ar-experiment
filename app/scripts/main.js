@@ -30,11 +30,11 @@ class PaperToss {
     this._soundsBase.events.on('game-over-tune-start', () => {
       // game over
       this.gamePause = true;
+      this.showMessage(5000, 'game over!');
     });
 
     this._soundsBase.events.on('game-over-tune-end', () => {
       // game over
-      this.showMessage(5000, 'game over!');
       this.setBinPositionButtonState();
     });
 
@@ -58,7 +58,7 @@ class PaperToss {
     this.gameBegin = false;
     this.currentScore = 0;
     this.ballsMissed = 0;
-    this.maxMissedBallsPerSet = 3;
+    this.maxMissedBallsPerSet = 1;
 
     // 3d objects
     this.basket = null;
@@ -404,26 +404,6 @@ class PaperToss {
     });
   }
 
-  createBallObject(pos, color, radius) {
-    const paperBallGeometry = new THREE.SphereGeometry(radius);
-    const paperBallMaterial = new THREE.MeshBasicMaterial({
-      color: color || 0xffffff,
-      opacity: 1,
-      wireframe: true
-    });
-
-    const paperBall = new THREE.Mesh(paperBallGeometry, paperBallMaterial);
-
-    paperBall.castShadow = true;
-    paperBall.receiveShadow = true;
-
-    if (pos) {
-      paperBall.position.copy(pos);
-    }
-
-    return paperBall;
-  }
-
   createBasketPhysicsWall() {
     if (this.basketWall.created) {
       Object.keys(this.basketWall).forEach((key) => {
@@ -484,6 +464,23 @@ class PaperToss {
     this.basketWall.created = true;
   }
 
+  resetGame() {
+    this.currentScore = 0;
+    this.ballsMissed = 0;
+    this.ballShot = 0;
+
+    this.hidePennywise();
+    this.gamePause = false;
+
+    // remove the ball from the ready
+    if (this.ballsReady) {
+      this._camera.remove(this.ballsReady);
+    }
+
+    this.reticle.show();
+    this.scoreBoard.innerHTML = this.padNumbers(this.currentScore, 3);
+  }
+
   showPennywise() {
     if (this.ballsMissed / this.maxMissedBallsPerSet === 1) {
       this.pennywise.visible = true;
@@ -498,8 +495,8 @@ class PaperToss {
       return;
     }
 
-    this.pennywise.position.x = this.pennywise.position.x + (this.ballsMissed / this.maxMissedBallsPerSet === 2 ? .6 : -.6);
-    this.pennywise.position.z += 1.5;
+    this.pennywise.position.x = this.ballsMissed / this.maxMissedBallsPerSet === 2 ? this._camera.position.x + .6 : this._camera.position.x;
+    this.pennywise.position.z = this.ballsMissed / this.maxMissedBallsPerSet === 2 ? this._camera.position.z - 2 : this._camera.position.z - .5;
   }
 
   hidePennywise() {
@@ -567,7 +564,7 @@ class PaperToss {
     if (collisionProps) {
       // if the collision body isGround prop is true, and score has not been assigned to the ball
       // time to clear it
-      if (collisionProps.body.isGround
+      if (collisionProps.contact.bj.isGround
         && this.balls[collisionProps.target.ballIndex]
         && !this.balls[collisionProps.target.ballIndex].scoreAssigned) {
         this.balls[collisionProps.target.ballIndex].scoreAssigned = true;
@@ -642,15 +639,7 @@ class PaperToss {
         this.reticle.hide();
         // this.showHideBallHolder();
       } else {
-        // remove the ball from the ready
-        if (this.ballsReady) {
-          this._camera.remove(this.ballsReady);
-        }
-
-        this.gamePause = false;
-        this.hidePennywise();
-
-        this.reticle.show();
+        this.resetGame();
       }
     }
 
