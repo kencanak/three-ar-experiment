@@ -1,6 +1,8 @@
 {
   "name": "three-ar-experiment",
   "version": "1.0.0",
+  "author": "Kencana Kesuma",
+  "license": "MIT",
   "description": "Three AR js experiment",
   "main": "dist/server.js",
   "scripts": {
@@ -21,7 +23,11 @@
   "dependencies": {
     "compression": "^1.4.4",
     "express": "^4.12.3",
-    "serve-static": "^1.9.2"
+    "serve-static": "^1.9.2",
+    "three": "^0.88.0",
+    "three.ar.js": "^0.1.6",
+    "events": "^1.1.1",
+    "gsap": "^1.20.3"
   },
   "devDependencies": {
     "babel-core": "6.14.0",
@@ -58,10 +64,7 @@
     "wiredep": "^4.0.0",
     "vinyl-source-stream": "^1.1.0",
     "vinyl-buffer": "^1.0.0",
-    "babelify": "^7.3.0",
-    "three": "^0.88.0",
-    "three.ar.js": "^0.1.6",
-    "events": "^1.1.1"
+    "babelify": "^7.3.0"
   },
   "eslintConfig": {
     "env": {
