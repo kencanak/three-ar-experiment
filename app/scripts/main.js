@@ -488,7 +488,7 @@ class PaperToss {
 
       this.pennywise.position.copy(this.basket.position);
 
-      this.pennywise.position.z = -5;
+      this.pennywise.position.z = -4;
 
       this.pennywise.position.y +=.5;
 
@@ -498,7 +498,7 @@ class PaperToss {
     }
 
     this.pennywise.position.x = this.pennywise.position.x + (this.ballsMissed / this.maxMissedBallsPerSet === 2 ? .6 : -.6);
-    this.pennywise.position.z += 2;
+    this.pennywise.position.z += 1.5;
   }
 
   hidePennywise() {
