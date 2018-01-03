@@ -56,5 +56,5 @@ Please *DO NOT* re-use any of the sounds for commercial purpose
 2. [x] add in swipe to throw thingy
 3. [x] improve user experience
 4. [x] proper game play add in score feat, need a score limit though
-5. [ ] add in fancy environment, and user feedback, we need some *pennywise* here, you'll float too!
+5. [x] add in fancy environment, and user feedback, we need some *pennywise* here, you'll float too!
 6. [x] add in gulp task for deploying to `gcloud` or `heroku`
